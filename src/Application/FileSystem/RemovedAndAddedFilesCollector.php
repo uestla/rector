@@ -6,7 +6,7 @@ namespace Rector\Core\Application\FileSystem;
 
 use Rector\Autodiscovery\ValueObject\NodesWithFileDestination;
 use Rector\Core\ValueObject\FilePathWithContent;
-use Rector\Core\ValueObject\MovedClass;
+use Rector\Core\ValueObject\MovedFile;
 use Symplify\SmartFileSystem\SmartFileInfo;
 
 final class RemovedAndAddedFilesCollector
@@ -22,7 +22,7 @@ final class RemovedAndAddedFilesCollector
     private $addedFilePathsWithContents = [];
 
     /**
-     * @var MovedClass[]
+     * @var MovedFile[]
      */
     private $movedFiles = [];
 
@@ -40,7 +40,7 @@ final class RemovedAndAddedFilesCollector
     {
         $content = $oldFileInfo->getContents();
 
-        $this->movedFiles[] = new MovedClass($oldFileInfo->getRelativeFilePath(), $newFileLocation, $content);
+        $this->movedFiles[] = new MovedFile($oldFileInfo, $newFileLocation, $content);
     }
 
     /**
@@ -52,11 +52,24 @@ final class RemovedAndAddedFilesCollector
     }
 
     /**
-     * @return MovedClass[]
+     * @return MovedFile[]
      */
     public function getMovedFiles(): array
     {
         return $this->movedFiles;
+    }
+
+    public function getMovedFile(SmartFileInfo $smartFileInfo): ?MovedFile
+    {
+        foreach ($this->movedFiles as $movedFile) {
+            if ($movedFile->getOldFileInfo()->getPathname() !== $smartFileInfo->getPathname()) {
+                continue;
+            }
+
+            return $movedFile;
+        }
+
+        return null;
     }
 
     public function isFileRemoved(SmartFileInfo $smartFileInfo): bool

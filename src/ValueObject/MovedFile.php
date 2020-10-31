@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Rector\Core\ValueObject;
 
-final class MovedClass
+use Symplify\SmartFileSystem\SmartFileInfo;
+
+final class MovedFile
 {
     /**
-     * @var string
+     * @var SmartFileInfo
      */
-    private $oldPath;
+    private $oldFileInfo;
 
     /**
      * @var string
@@ -21,16 +23,16 @@ final class MovedClass
      */
     private $fileContent;
 
-    public function __construct(string $oldPath, string $newPath, string $fileContent)
+    public function __construct(SmartFileInfo $oldFileInfo, string $newPath, string $fileContent)
     {
-        $this->oldPath = $oldPath;
+        $this->oldFileInfo = $oldFileInfo;
         $this->newPath = $newPath;
         $this->fileContent = $fileContent;
     }
 
-    public function getOldPath(): string
+    public function getOldFileInfo(): SmartFileInfo
     {
-        return $this->oldPath;
+        return $this->oldFileInfo;
     }
 
     public function getNewPath(): string

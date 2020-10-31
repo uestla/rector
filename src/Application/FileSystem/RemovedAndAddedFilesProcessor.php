@@ -6,7 +6,7 @@ namespace Rector\Core\Application\FileSystem;
 
 use Rector\Core\Configuration\Configuration;
 use Rector\Core\PhpParser\Printer\NodesWithFileDestinationPrinter;
-use Rector\Core\ValueObject\MovedClass;
+use Rector\Core\ValueObject\MovedFile;
 use Rector\Testing\PHPUnit\StaticPHPUnitEnvironment;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symplify\SmartFileSystem\SmartFileSystem;
@@ -124,7 +124,7 @@ final class RemovedAndAddedFilesProcessor
             } else {
                 $this->printFileMoveWarning($movedClassValueObject, 'was');
 
-                $this->smartFileSystem->remove($movedClassValueObject->getOldPath());
+                $this->smartFileSystem->remove($movedClassValueObject->getOldFileInfo());
 
                 $this->smartFileSystem->dumpFile(
                     $movedClassValueObject->getNewPath(),
@@ -134,14 +134,15 @@ final class RemovedAndAddedFilesProcessor
         }
     }
 
-    private function printFileMoveWarning(MovedClass $movedClass, string $verb): void
+    private function printFileMoveWarning(MovedFile $movedClass, string $verb): void
     {
         $message = sprintf(
             'File "%s" %s moved to "%s"',
-            $movedClass->getOldPath(),
+            $movedClass->getOldFileInfo(),
             $verb,
             $movedClass->getNewPath()
         );
+
         $this->symfonyStyle->warning($message);
     }
 }

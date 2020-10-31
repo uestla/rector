@@ -63,7 +63,7 @@ CODE_SAMPLE
         $oldPathName = $fileInfo->getPathname();
 
         // ends with Spec.php
-        if (! Strings::endsWith($oldPathName, 'Spec.php')) {
+        if (! Strings::match($oldPathName, self::SPEC_SUFFIX_REGEX)) {
             return null;
         }
 
