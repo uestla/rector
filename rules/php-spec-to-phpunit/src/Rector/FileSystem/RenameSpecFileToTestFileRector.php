@@ -5,17 +5,18 @@ declare(strict_types=1);
 namespace Rector\PhpSpecToPHPUnit\Rector\FileSystem;
 
 use Nette\Utils\Strings;
+use PhpParser\Node;
+use Rector\Core\PhpParser\Node\CustomNode\FileNode;
+use Rector\Core\Rector\AbstractRector;
 use Rector\Core\RectorDefinition\CodeSample;
 use Rector\Core\RectorDefinition\RectorDefinition;
-use Rector\FileSystemRector\Rector\AbstractFileSystemRector;
-use Symplify\SmartFileSystem\SmartFileInfo;
 
 /**
  * @see https://gnugat.github.io/2015/09/23/phpunit-with-phpspec.html
  *
- * @see \Rector\PhpSpecToPHPUnit\Tests\Rector\Variable\PhpSpecToPHPUnitRector\PhpSpecToPHPUnitRectorTest
+ * @see \Rector\PhpSpecToPHPUnit\Tests\Rector\FileSystem\RenameSpecFileToTestFileRector\RenameSpecFileToTestFileRectorTest
  */
-final class RenameSpecFileToTestFileRector extends AbstractFileSystemRector
+final class RenameSpecFileToTestFileRector extends AbstractRector
 {
     /**
      * @var string
@@ -45,25 +46,34 @@ CODE_SAMPLE
             ]);
     }
 
-    public function refactor(SmartFileInfo $smartFileInfo): void
+    /**
+     * @return string[]
+     */
+    public function getNodeTypes(): array
     {
-        $oldRealPath = $smartFileInfo->getRealPath();
-
-        // ends with Spec.php
-        if (! Strings::endsWith($oldRealPath, 'Spec.php')) {
-            return;
-        }
-
-        $newRealPath = $this->createNewRealPath($oldRealPath);
-
-        // rename
-        $this->smartFileSystem->rename($oldRealPath, $newRealPath);
-
-        // remove old file
-        $this->removeFile($smartFileInfo);
+        return [FileNode::class];
     }
 
-    private function createNewRealPath(string $oldRealPath): string
+    /**
+     * @param FileNode $node
+     */
+    public function refactor(Node $node): ?Node
+    {
+        $fileInfo = $node->getFileInfo();
+        $oldPathName = $fileInfo->getPathname();
+
+        // ends with Spec.php
+        if (! Strings::endsWith($oldPathName, 'Spec.php')) {
+            return null;
+        }
+
+        $newPathName = $this->createPathName($oldPathName);
+        $this->moveFile($fileInfo, $newPathName);
+
+        return null;
+    }
+
+    private function createPathName(string $oldRealPath): string
     {
         // suffix
         $newRealPath = Strings::replace($oldRealPath, self::SPEC_SUFFIX_REGEX, 'Test.php');

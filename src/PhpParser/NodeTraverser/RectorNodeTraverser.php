@@ -14,6 +14,7 @@ use Rector\Core\Configuration\Configuration;
 use Rector\Core\Contract\Rector\ConfigurableRectorInterface;
 use Rector\Core\Contract\Rector\PhpRectorInterface;
 use Rector\Core\Exception\ShouldNotHappenException;
+use Rector\Core\PhpParser\Node\CustomNode\FileNode;
 use Rector\Core\PhpParser\Node\CustomNode\FileWithoutNamespace;
 use Rector\NodeTypeResolver\FileSystem\CurrentFileInfoProvider;
 use Rector\NodeTypeResolver\Node\AttributeKey;
@@ -73,6 +74,11 @@ final class RectorNodeTraverser extends NodeTraverser
      */
     public function traverse(array $nodes): array
     {
+        $fileInfo = $this->currentFileInfoProvider->getSmartFileInfo();
+        $fileNode = new FileNode($nodes, $fileInfo);
+
+        parent::traverse([$fileNode]);
+
         if ($this->enabledRectorsProvider->isConfigured()) {
             $this->configureEnabledRectorsOnly();
         }
